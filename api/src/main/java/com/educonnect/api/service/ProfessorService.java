@@ -58,8 +58,10 @@ public class ProfessorService {
             professorShortDetailsDtos.add(dto);
 
             Optional<UUID> universityId = experienceRepository.findCurrentUniversityIdByProfessorId(professor.getId());
-            String universityName = getUniversityName(universityId.orElse(null));
-            dto.setUniversity(universityName);
+            if (universityId.isPresent()) {
+                String universityName = getUniversityName(universityId.get());
+                dto.setUniversity(universityName);
+            }
             dto.setPublicationCount(String.valueOf(getPublicationsCount(professor.getId())));
         });
         return professorShortDetailsDtos;
@@ -103,10 +105,11 @@ public class ProfessorService {
         }
         professorDetailsDto.setPapers(paperDtos);
 
-        List<Field> fields = fieldRepository.findByProfessorId(professor.getId());
+        List<ProfessorField> fieldIds = professorFieldRepository.findByProfessorId(professor.getId());
         List<String> fieldTitles = new ArrayList<>();
-        for (Field field : fields) {
-            fieldTitles.add(field.getTitle());
+        for (ProfessorField field : fieldIds) {
+            String fieldTitle = getFieldTitle(field.getFieldId());
+            fieldTitles.add(fieldTitle);
         }
         professorDetailsDto.setFields(fieldTitles);
 
@@ -139,6 +142,7 @@ public class ProfessorService {
         Professor professor = professorRepository.findById(profId).orElse(null);
         if (professor != null) {
             Experience experience = new Experience();
+            experience.setUniversityId(UUID.fromString(experienceDto.getUniversityId()));
             experience.setProfessorId(profId);
             experience.setTitle(experienceDto.getTitle());
             experience.setStartYear(Integer.parseInt(experienceDto.getStartYear()));
@@ -196,12 +200,17 @@ public class ProfessorService {
     }
 
     private String getUniversityName(UUID universityId) {
-        University university = universityRepository.findById(universityId).orElse(null);
-        return university != null ? university.getName() : "Unknown University";
+        Optional<University> university = universityRepository.findById(universityId);
+        return university.isPresent() ? university.get().getName() : "Unknown University";
     }
 
     private int getPublicationsCount(UUID professorId) {
         return paperRepository.countByProfessorId(professorId);
+    }
+
+    private String getFieldTitle(UUID fieldId) {
+        Field field = fieldRepository.findById(fieldId).orElse(null);
+        return field != null ? field.getTitle() : "Unknown Field";
     }
 
 }

@@ -2,6 +2,8 @@ package com.educonnect.api.controller;
 
 import com.educonnect.api.service.AuthService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,12 +27,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public void register(@RequestBody RegRequestDto regRequestDto) {
+    public void register(@Valid @RequestBody RegRequestDto regRequestDto) {
         authService.registerUser(regRequestDto);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginReqDto) {
+    public ResponseEntity<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto) {
         String token = authService.loginUser(loginReqDto);
         LoginResDto loginResDto = new LoginResDto(token);
         return ResponseEntity.ok(loginResDto);

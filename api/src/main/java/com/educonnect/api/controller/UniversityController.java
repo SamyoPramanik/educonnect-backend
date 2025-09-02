@@ -9,6 +9,8 @@ import com.educonnect.api.model.University;
 import com.educonnect.api.service.UniversityService;
 import com.educonnect.api.util.JwtUtil;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,12 +37,14 @@ public class UniversityController {
 
     @PostMapping("/create")
     public ResponseEntity<UniversityDto> createUniversity(@RequestHeader("Authorization") String token,
-            @RequestBody UniversityDto universityDto) {
+            @Valid @RequestBody UniversityDto universityDto) {
         String authToken = JwtUtil.extractToken(token);
         String role = jwtUtil.getRoleFromToken(authToken);
         if (!role.equals("ADMIN") && !role.equals("MODERATOR")) {
             throw new RuntimeException("Unauthorized");
         }
+
+        System.out.println("Creating university: " + universityDto.getName());
 
         UniversityDto createdUniversity = universityService.createUniversity(universityDto);
         return ResponseEntity.ok(createdUniversity);
@@ -61,13 +65,13 @@ public class UniversityController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UniversityDto> updateUniversity(@RequestHeader("Authorization") String token,
-            @RequestBody UniversityDto universityDto, @PathVariable String id) {
+            @Valid @RequestBody UniversityDto universityDto, @PathVariable String id) {
         String authToken = JwtUtil.extractToken(token);
         String role = jwtUtil.getRoleFromToken(authToken);
         if (!role.equals("ADMIN") && !role.equals("MODERATOR")) {
             throw new RuntimeException("Unauthorized");
         }
-        UniversityDto updatedUniversity = universityService.updateUniversity(UUID.fromString(universityDto.getId()),
+        UniversityDto updatedUniversity = universityService.updateUniversity(UUID.fromString(id),
                 universityDto);
         return ResponseEntity.ok(updatedUniversity);
     }

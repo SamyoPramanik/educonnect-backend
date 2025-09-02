@@ -10,5 +10,4 @@ import com.educonnect.api.model.Field;
 
 @Repository
 public interface FieldRepository extends JpaRepository<Field, UUID> {
-    List<Field> findByProfessorId(UUID professorId);
 }

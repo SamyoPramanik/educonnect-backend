@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.educonnect.api.dto.FieldDto;
 import com.educonnect.api.service.FieldService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,13 +29,13 @@ public class FieldController {
         return fieldService.getFieldById(id);
     }
 
-    @PostMapping
-    public FieldDto createField(@RequestBody FieldDto fieldDto) {
+    @PostMapping("/create")
+    public FieldDto createField(@Valid @RequestBody FieldDto fieldDto) {
         return fieldService.createField(fieldDto);
     }
 
     @PutMapping("/{id}")
-    public FieldDto updateField(@PathVariable String id, @RequestBody FieldDto fieldDto) {
+    public FieldDto updateField(@PathVariable String id, @Valid @RequestBody FieldDto fieldDto) {
         return fieldService.updateField(id, fieldDto);
     }
 

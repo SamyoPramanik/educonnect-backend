@@ -5,20 +5,26 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
+import com.educonnect.api.dto.ExperienceDto;
 import com.educonnect.api.dto.FieldDto;
 import com.educonnect.api.dto.PaperDto;
 import com.educonnect.api.dto.ProfessorDetailsDto;
 import com.educonnect.api.dto.ProfessorDto;
 import com.educonnect.api.dto.ProfessorShortDetailsDto;
 import com.educonnect.api.service.ProfessorService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
+@RestController
+@RequestMapping("/api/professor")
 public class ProfessorController {
     private final ProfessorService professorService;
 
@@ -42,21 +48,22 @@ public class ProfessorController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<ProfessorDto> createProfessor(@RequestBody ProfessorDto professorDto) {
+    public ResponseEntity<ProfessorDto> createProfessor(@Valid @RequestBody ProfessorDto professorDto) {
         ProfessorDto createdProfessor = professorService.createProfessor(professorDto);
         return ResponseEntity.ok(createdProfessor);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<ProfessorDto> updateProfessor(@PathVariable String id,
-            @RequestBody ProfessorDto professorDto) {
+            @Valid @RequestBody ProfessorDto professorDto) {
         ProfessorDto updatedProfessor = professorService.updateProfessor(id, professorDto);
         return ResponseEntity.ok(updatedProfessor);
     }
 
-    @GetMapping("/{profId}/add-experience/{expId}")
-    public ResponseEntity<String> getMethodName(@PathVariable String profId, @PathVariable String expId) {
-        professorService.addExperience(profId, null);
+    @PostMapping("/{profId}/add-experience")
+    public ResponseEntity<String> addExperience(@PathVariable String profId,
+            @Valid @RequestBody ExperienceDto experienceDto) {
+        professorService.addExperience(profId, experienceDto);
         return ResponseEntity.ok("Experience added");
     }
 
@@ -67,14 +74,14 @@ public class ProfessorController {
     }
 
     @PostMapping("/{profId}/add-paper")
-    public ResponseEntity<String> addPaper(@PathVariable String profId, @RequestBody PaperDto paperDto) {
+    public ResponseEntity<String> addPaper(@PathVariable String profId, @Valid @RequestBody PaperDto paperDto) {
         professorService.addPaper(profId, paperDto);
         return ResponseEntity.ok("Paper added");
     }
 
-    @GetMapping("/{profId}/add-experience/{expId}")
-    public ResponseEntity<String> deletePaper(@PathVariable String profId, @PathVariable String expId) {
-        professorService.deletePaper(profId, expId);
+    @GetMapping("/{profId}/delete-paper/{paperId}")
+    public ResponseEntity<String> deletePaper(@PathVariable String profId, @PathVariable String paperId) {
+        professorService.deletePaper(profId, paperId);
         return ResponseEntity.ok("Paper deleted");
     }
 

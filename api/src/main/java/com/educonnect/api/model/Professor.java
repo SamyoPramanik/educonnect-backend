@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 public class Professor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @NotBlank
@@ -21,6 +21,9 @@ public class Professor {
     private String country;
     private String email;
     private String url;
+
+    public Professor() {
+    }
 
     public Professor(String name, String bio, String country, String email, String url) {
         this.name = name;

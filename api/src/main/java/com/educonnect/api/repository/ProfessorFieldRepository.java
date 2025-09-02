@@ -1,5 +1,6 @@
 package com.educonnect.api.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,5 +10,5 @@ import com.educonnect.api.model.ProfessorField;
 
 @Repository
 public interface ProfessorFieldRepository extends JpaRepository<ProfessorField, UUID> {
-
+    List<ProfessorField> findByProfessorId(UUID professorId);
 }

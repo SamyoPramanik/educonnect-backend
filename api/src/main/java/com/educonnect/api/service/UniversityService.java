@@ -24,11 +24,11 @@ public class UniversityService {
 
     public UniversityDto createUniversity(UniversityDto universityDto) {
         Optional<University> existingUniversity = universityRepository.findByName(universityDto.getName());
+        System.out.println("Creating university from service: " + universityDto.getName());
         if (existingUniversity.isPresent()) {
             throw new IllegalArgumentException("University with name " + universityDto.getName() + " already exists");
         }
         University university = new University();
-        university.setId(UUID.fromString(universityDto.getId()));
         university.setName(universityDto.getName());
         university.setCountry(universityDto.getCountry());
         university.setState(universityDto.getState());
@@ -56,6 +56,7 @@ public class UniversityService {
     }
 
     public UniversityDto updateUniversity(UUID id, UniversityDto universityDto) {
+        System.out.println("university name: " + universityDto.getName());
         Optional<University> existingUniversity = universityRepository.findByNameAndIdNot(universityDto.getName(), id);
         if (existingUniversity.isPresent()) {
             throw new IllegalArgumentException("University with name " + universityDto.getName() + " already exists");
