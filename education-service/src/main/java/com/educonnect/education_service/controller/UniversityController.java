@@ -9,6 +9,8 @@ import com.educonnect.education_service.dto.UniversityDto;
 import com.educonnect.education_service.dto.UserDto;
 import com.educonnect.education_service.model.University;
 import com.educonnect.education_service.service.UniversityService;
+import com.educonnect.education_service.util.UserUtil;
+
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -28,16 +30,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @RequestMapping("/api/university")
 public class UniversityController {
     private final UniversityService universityService;
+    private final UserUtil userUtil;
 
-    public UniversityController(UniversityService universityService) {
+    public UniversityController(UniversityService universityService, UserUtil userUtil) {
         this.universityService = universityService;
+        this.userUtil = userUtil;
     }
 
     @PostMapping("/create")
     public ResponseEntity<UniversityDto> createUniversity(@RequestHeader("Authorization") String token,
             @Valid @RequestBody UniversityDto universityDto) {
 
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         String role = user.getRole();
 
         if (!role.equals("ADMIN") && !role.equals("MODERATOR")) {
@@ -53,7 +57,7 @@ public class UniversityController {
     @PostMapping("/{id}")
     public ResponseEntity<UniversityDto> getUniversityById(@RequestHeader("Authorization") String token,
             @PathVariable String id) {
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         if (user == null) {
             throw new RuntimeException("Unauthorized");
         }
@@ -66,7 +70,7 @@ public class UniversityController {
     public ResponseEntity<UniversityDto> updateUniversity(@RequestHeader("Authorization") String token,
             @Valid @RequestBody UniversityDto universityDto, @PathVariable String id) {
 
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         String role = user.getRole();
 
         if (!role.equals("ADMIN") && !role.equals("MODERATOR")) {
@@ -80,7 +84,7 @@ public class UniversityController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUniversity(@RequestHeader("Authorization") String token,
             @PathVariable String id) {
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         String role = user.getRole();
 
         if (!role.equals("ADMIN") && !role.equals("MODERATOR")) {
@@ -92,7 +96,7 @@ public class UniversityController {
 
     @GetMapping("/all")
     public ResponseEntity<List<UniversityDto>> getAllUniversities(@RequestHeader("Authorization") String token) {
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         if (user == null) {
             throw new RuntimeException("Unauthorized");
         }
@@ -103,26 +107,11 @@ public class UniversityController {
     @GetMapping("/search")
     public ResponseEntity<List<UniversityDto>> searchUniversities(@RequestHeader("Authorization") String token,
             @RequestParam String query) {
-        UserDto user = getUser(token);
+        UserDto user = userUtil.getUser(token);
         if (user == null) {
             throw new RuntimeException("Unauthorized");
         }
         List<UniversityDto> universities = universityService.searchUniversitiesByName(query);
         return ResponseEntity.ok(universities);
-    }
-
-    private UserDto getUser(String token) {
-        try {
-            WebClient webClient = WebClient.create("http://auth-service:8080");
-            return webClient.get()
-                    .uri("/auth/userinfo")
-                    .header("Authorization", token)
-                    .retrieve()
-                    .bodyToMono(UserDto.class)
-                    .block();
-        } catch (Exception e) {
-            throw new RuntimeException("Unauthorized");
-        }
-
     }
 }
