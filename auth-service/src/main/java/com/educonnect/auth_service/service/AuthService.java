@@ -18,12 +18,15 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final SessionService sessionService;
     private final JwtUtil jwtUtil;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
+            SessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.sessionService = sessionService;
     }
 
     public void registerUser(RegRequestDto regRequestDto) {
@@ -61,10 +64,24 @@ public class AuthService {
 
             if (passwordEncoder.matches(password, user.getPassword())) {
                 // Generate and return a JWT token
-                return jwtUtil.generateToken(id, email, role);
+                String token = jwtUtil.generateToken(id, email, role);
+                sessionService.createSession(id, token, "windows");
+                return token;
             }
         }
         throw new RuntimeException("Invalid email or password");
+    }
+
+    public void logoutUser(String authToken) {
+        sessionService.invalidateSession(authToken);
+    }
+
+    public void logoutAllSessions(UUID userId) {
+        sessionService.invalidateAllSessions(userId);
+    }
+
+    public void logoutSession(String sessionId) {
+        sessionService.invalidateSession(sessionId);
     }
 
     public UserDto getUserfromToken(String authToken) {
@@ -73,5 +90,19 @@ public class AuthService {
         String id = jwtUtil.getIdFromToken(authToken).toString();
         UserDto userDto = new UserDto(id, email, role);
         return userDto;
+    }
+
+    public void changeUserStatus(UUID userId, String status) {
+        if (!status.equals("ACTIVE") && !status.equals("PENDING") && !status.equals("SUSPENDED")) {
+            throw new RuntimeException("Invalid status");
+        }
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setStatus(status);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
     }
 }

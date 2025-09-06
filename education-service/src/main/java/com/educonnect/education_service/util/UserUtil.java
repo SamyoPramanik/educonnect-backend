@@ -1,9 +1,11 @@
 package com.educonnect.education_service.util;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.educonnect.education_service.dto.UserDto;
 
+@Component
 public class UserUtil {
     public UserDto getUser(String token) {
         try {
