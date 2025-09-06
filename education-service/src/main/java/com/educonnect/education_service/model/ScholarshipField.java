@@ -8,13 +8,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class ProfessorField {
+public class ScholarshipField {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private UUID professorId;
+    private UUID scholarshipId;
     private UUID fieldId;
 
     public UUID getId() {
@@ -25,12 +25,12 @@ public class ProfessorField {
         this.id = id;
     }
 
-    public UUID getProfessorId() {
-        return professorId;
+    public UUID getScholarshipId() {
+        return scholarshipId;
     }
 
-    public void setProfessorId(UUID professorId) {
-        this.professorId = professorId;
+    public void setScholarshipId(UUID scholarshipId) {
+        this.scholarshipId = scholarshipId;
     }
 
     public UUID getFieldId() {
@@ -40,4 +40,6 @@ public class ProfessorField {
     public void setFieldId(UUID fieldId) {
         this.fieldId = fieldId;
     }
+
+    // Getters and Setters
 }

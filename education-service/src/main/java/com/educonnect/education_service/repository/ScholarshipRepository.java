@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.educonnect.education_service.model.ProfessorField;
+import com.educonnect.education_service.model.Scholarship;
 
 @Repository
-public interface ProfessorFieldRepository extends JpaRepository<ProfessorField, UUID> {
-    List<ProfessorField> findByProfessorId(UUID professorId);
+public interface ScholarshipRepository extends JpaRepository<Scholarship, UUID> {
+    List<Scholarship> findByUniversityId(UUID universityId);
 }
