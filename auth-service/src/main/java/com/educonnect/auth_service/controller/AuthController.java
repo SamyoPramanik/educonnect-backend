@@ -4,6 +4,8 @@ import com.educonnect.auth_service.service.AuthService;
 import com.educonnect.auth_service.service.SessionService;
 import com.educonnect.auth_service.util.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -41,11 +43,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Tag(name = "Register a new user")
+    @Operation(summary = "Register a new user")
     public void register(@Valid @RequestBody RegRequestDto regRequestDto) {
         authService.registerUser(regRequestDto);
     }
 
     @PostMapping("/login")
+    @Tag(name = "Login a user")
+    @Operation(summary = "Login a user")
     public ResponseEntity<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto) {
         String token = authService.loginUser(loginReqDto);
         LoginResDto loginResDto = new LoginResDto(token);
@@ -53,6 +59,8 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
+    @Tag(name = "Logout a user")
+    @Operation(summary = "Logout current session")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         String authToken = JwtUtil.extractToken(token);
         boolean loggedIn = jwtUtil.validateToken(authToken);
@@ -64,6 +72,8 @@ public class AuthController {
     }
 
     @GetMapping("/logout-all")
+    @Tag(name = "Logout from all sessions")
+    @Operation(summary = "Logout from all sessions")
     public ResponseEntity<String> logoutAll(@RequestHeader("Authorization") String token) {
         String authToken = JwtUtil.extractToken(token);
         boolean loggedIn = jwtUtil.validateToken(authToken);
@@ -76,12 +86,16 @@ public class AuthController {
     }
 
     @GetMapping("/logout-session/{sessionId}")
+    @Tag(name = "Logout from a specific session")
+    @Operation(summary = "Logout from a specific session")
     public ResponseEntity<String> logoutSession(@PathVariable String sessionId) {
         sessionService.invalidateSession(sessionId);
         return ResponseEntity.ok("Logged out from session " + sessionId);
     }
 
     @GetMapping("/userinfo")
+    @Tag(name = "Get user information")
+    @Operation(summary = "Get user information from token")
     public ResponseEntity<UserDto> getUserInfo(@RequestHeader("Authorization") String token) {
         String authToken = JwtUtil.extractToken(token);
         boolean loggedIn = jwtUtil.validateToken(authToken);
@@ -97,6 +111,8 @@ public class AuthController {
     }
 
     @GetMapping("/sessions")
+    @Tag(name = "Get user sessions")
+    @Operation(summary = "Get all active sessions for the user")
     public ResponseEntity<List<SessionDto>> getUserSessions(@RequestHeader("Authorization") String token) {
         String authToken = JwtUtil.extractToken(token);
         boolean loggedIn = jwtUtil.validateToken(authToken);
@@ -112,6 +128,8 @@ public class AuthController {
     }
 
     @GetMapping("/update-status/{userId}/{status}")
+    @Tag(name = "Update user status")
+    @Operation(summary = "Update user status (ADMIN only)")
     public ResponseEntity<String> updateUserStatus(@RequestHeader("Authorization") String token,
             @PathVariable String userId, @PathVariable String status) {
         String authToken = JwtUtil.extractToken(token);

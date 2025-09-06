@@ -11,6 +11,8 @@ import com.educonnect.education_service.model.University;
 import com.educonnect.education_service.service.UniversityService;
 import com.educonnect.education_service.util.UserUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -38,6 +40,8 @@ public class UniversityController {
     }
 
     @PostMapping("/create")
+    @Tag(name = "Create a new university")
+    @Operation(summary = "Create a new university")
     public ResponseEntity<UniversityDto> createUniversity(@RequestHeader("Authorization") String token,
             @Valid @RequestBody UniversityDto universityDto) {
 
@@ -55,6 +59,8 @@ public class UniversityController {
     }
 
     @PostMapping("/{id}")
+    @Tag(name = "Get university by ID")
+    @Operation(summary = "Get university by ID")
     public ResponseEntity<UniversityDto> getUniversityById(@RequestHeader("Authorization") String token,
             @PathVariable String id) {
         UserDto user = userUtil.getUser(token);
@@ -67,6 +73,8 @@ public class UniversityController {
     }
 
     @PutMapping("/{id}")
+    @Tag(name = "Update an existing university")
+    @Operation(summary = "Update an existing university")
     public ResponseEntity<UniversityDto> updateUniversity(@RequestHeader("Authorization") String token,
             @Valid @RequestBody UniversityDto universityDto, @PathVariable String id) {
 
@@ -82,6 +90,8 @@ public class UniversityController {
     }
 
     @DeleteMapping("/{id}")
+    @Tag(name = "Delete a university")
+    @Operation(summary = "Delete a university by ID")
     public ResponseEntity<Void> deleteUniversity(@RequestHeader("Authorization") String token,
             @PathVariable String id) {
         UserDto user = userUtil.getUser(token);
@@ -95,6 +105,8 @@ public class UniversityController {
     }
 
     @GetMapping("/all")
+    @Tag(name = "Get all universities")
+    @Operation(summary = "Get all universities")
     public ResponseEntity<List<UniversityDto>> getAllUniversities(@RequestHeader("Authorization") String token) {
         UserDto user = userUtil.getUser(token);
         if (user == null) {
@@ -105,6 +117,8 @@ public class UniversityController {
     }
 
     @GetMapping("/search")
+    @Tag(name = "Search universities by name")
+    @Operation(summary = "Search universities by name")
     public ResponseEntity<List<UniversityDto>> searchUniversities(@RequestHeader("Authorization") String token,
             @RequestParam String query) {
         UserDto user = userUtil.getUser(token);

@@ -13,6 +13,8 @@ import com.educonnect.education_service.dto.ProfessorDto;
 import com.educonnect.education_service.dto.ProfessorShortDetailsDto;
 import com.educonnect.education_service.service.ProfessorService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,12 +35,16 @@ public class ProfessorController {
     }
 
     @GetMapping("/all")
+    @Tag(name = "Get all professors")
+    @Operation(summary = "Get all professors")
     public ResponseEntity<List<ProfessorShortDetailsDto>> getAllProfessors() {
         List<ProfessorShortDetailsDto> professors = professorService.getProfessors();
         return ResponseEntity.ok(professors);
     }
 
     @GetMapping("/{profId}")
+    @Tag(name = "Get professor by ID")
+    @Operation(summary = "Get professor by ID")
     public ResponseEntity<ProfessorDetailsDto> getProfessor(@PathVariable String profId) {
         ProfessorDetailsDto professor = professorService.getProfessor(profId);
         if (professor == null) {
@@ -48,12 +54,16 @@ public class ProfessorController {
     }
 
     @PostMapping("/new")
+    @Tag(name = "Create a new professor")
+    @Operation(summary = "Create a new professor")
     public ResponseEntity<ProfessorDto> createProfessor(@Valid @RequestBody ProfessorDto professorDto) {
         ProfessorDto createdProfessor = professorService.createProfessor(professorDto);
         return ResponseEntity.ok(createdProfessor);
     }
 
     @PutMapping("/update/{id}")
+    @Tag(name = "Update an existing professor")
+    @Operation(summary = "Update an existing professor")
     public ResponseEntity<ProfessorDto> updateProfessor(@PathVariable String id,
             @Valid @RequestBody ProfessorDto professorDto) {
         ProfessorDto updatedProfessor = professorService.updateProfessor(id, professorDto);
@@ -61,6 +71,8 @@ public class ProfessorController {
     }
 
     @PostMapping("/{profId}/add-experience")
+    @Tag(name = "Add experience to professor")
+    @Operation(summary = "Add experience to professor")
     public ResponseEntity<String> addExperience(@PathVariable String profId,
             @Valid @RequestBody ExperienceDto experienceDto) {
         professorService.addExperience(profId, experienceDto);
@@ -68,24 +80,32 @@ public class ProfessorController {
     }
 
     @GetMapping("{profId}/delete-experience/{expId}")
+    @Tag(name = "Delete experience from professor")
+    @Operation(summary = "Delete experience from professor")
     public ResponseEntity<String> deleteExperience(@PathVariable String profId, @PathVariable String expId) {
         professorService.deleteExperience(profId, expId);
         return ResponseEntity.ok("Experience deleted");
     }
 
     @PostMapping("/{profId}/add-paper")
+    @Tag(name = "Add paper to professor")
+    @Operation(summary = "Add paper to professor")
     public ResponseEntity<String> addPaper(@PathVariable String profId, @Valid @RequestBody PaperDto paperDto) {
         professorService.addPaper(profId, paperDto);
         return ResponseEntity.ok("Paper added");
     }
 
     @GetMapping("/{profId}/delete-paper/{paperId}")
+    @Tag(name = "Delete paper from professor")
+    @Operation(summary = "Delete paper from professor")
     public ResponseEntity<String> deletePaper(@PathVariable String profId, @PathVariable String paperId) {
         professorService.deletePaper(profId, paperId);
         return ResponseEntity.ok("Paper deleted");
     }
 
     @PostMapping("/{profId}/add-field")
+    @Tag(name = "Add field(Research interest) to professor")
+    @Operation(summary = "Add field(Research interest) to professor")
     public ResponseEntity<String> addField(@PathVariable String profId, @RequestBody List<String> fieldDtos) {
         professorService.addField(profId, fieldDtos);
         return ResponseEntity.ok("Field added");
