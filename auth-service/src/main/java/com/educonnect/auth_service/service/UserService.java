@@ -21,7 +21,11 @@ public class UserService {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            UserDto userDto = new UserDto(user.getId().toString(), user.getEmail(), user.getRole());
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId().toString());
+            userDto.setEmail(user.getEmail());
+            userDto.setRole(user.getRole());
+            userDto.setStatus(user.getStatus());
             return Optional.of(userDto);
         }
         return Optional.empty();
