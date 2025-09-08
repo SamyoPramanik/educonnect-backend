@@ -39,26 +39,47 @@ services:
       - ./education-service/pom.xml:/app/pom.xml
     networks:
       - app_network
-  # student-service:
-  #   build:
-  #     context: ./student-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8083:8080"
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/educonnect
-  #     SPRING_DATASOURCE_USERNAME: user
-  #     SPRING_DATASOURCE_PASSWORD: password
-  #     SPRING_JPA_HIBERNATE_DDL_AUTO: update
-  #     SPRING_SQL_INIT_MODE: always
-  #   depends_on:
-  #     - db
-  #     - auth-service
-  #   volumes:
-  #     - ./student-service/src:/app/src
-  #     - ./student-service/pom.xml:/app/pom.xml
-  #   networks:
-  #     - app_network
+  student-service:
+    build:
+      context: ./student-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/educonnect
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    depends_on:
+      - db
+      - auth-service
+    volumes:
+      - ./student-service/src:/app/src
+      - ./student-service/pom.xml:/app/pom.xml
+    networks:
+      - app_network
+
+  housing-service:
+    build:
+      context: ./housing-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/educonnect
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    depends_on:
+      - db
+      - auth-service
+    volumes:
+      - ./housing-service/src:/app/src
+      - ./housing-service/pom.xml:/app/pom.xml
+    networks:
+      - app_network
   db:
     image: postgres:latest
     environment:
