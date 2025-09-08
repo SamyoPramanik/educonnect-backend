@@ -4,6 +4,10 @@ public class UserDto {
     private String id;
     private String email;
     private String role;
+    private String status;
+
+    public UserDto() {
+    }
 
     public UserDto(String id, String email, String role) {
         this.id = id;
@@ -34,5 +38,13 @@ public class UserDto {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
