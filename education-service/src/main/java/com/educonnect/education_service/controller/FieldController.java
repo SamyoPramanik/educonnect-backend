@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,13 @@ public class FieldController {
 
     public FieldController(FieldService fieldService) {
         this.fieldService = fieldService;
+    }
+
+    @GetMapping("/all")
+    @Tag(name = "Get all fields")
+    @Operation(summary = "Get all fields")
+    public List<FieldDto> getAllFields() {
+        return fieldService.getAllFields();
     }
 
     @GetMapping("/{id}")

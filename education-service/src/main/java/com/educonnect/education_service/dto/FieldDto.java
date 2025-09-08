@@ -1,11 +1,12 @@
 package com.educonnect.education_service.dto;
 
-import java.util.UUID;
-
 public class FieldDto {
     private String id;
 
     private String title;
+
+    public FieldDto() {
+    }
 
     public FieldDto(String id, String title) {
         this.id = id;

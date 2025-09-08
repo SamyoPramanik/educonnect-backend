@@ -11,4 +11,6 @@ import com.educonnect.education_service.model.ProfessorField;
 @Repository
 public interface ProfessorFieldRepository extends JpaRepository<ProfessorField, UUID> {
     List<ProfessorField> findByProfessorId(UUID professorId);
+
+    ProfessorField findByProfessorIdAndFieldId(UUID professorId, UUID fieldId);
 }

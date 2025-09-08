@@ -103,19 +103,19 @@ public class ProfessorController {
         return ResponseEntity.ok("Paper deleted");
     }
 
-    @PostMapping("/{profId}/add-field")
+    @GetMapping("/{profId}/add-field/{fieldId}")
     @Tag(name = "Add field(Research interest) to professor")
     @Operation(summary = "Add field(Research interest) to professor")
-    public ResponseEntity<String> addField(@PathVariable String profId, @RequestBody List<String> fieldDtos) {
-        professorService.addField(profId, fieldDtos);
+    public ResponseEntity<String> addField(@PathVariable String profId, @PathVariable String fieldId) {
+        professorService.addField(profId, fieldId);
         return ResponseEntity.ok("Field added");
     }
 
-    // @GetMapping("/{profId}/delete-field/{fieldId}")
-    // public ResponseEntity<String> deleteField(@PathVariable String profId,
-    // @PathVariable String fieldId) {
-    // professorService.deleteField(profId, fieldId);
-    // return ResponseEntity.ok("Field deleted");
-    // }
+    @GetMapping("/{profId}/delete-field/{fieldId}")
+    public ResponseEntity<String> deleteField(@PathVariable String profId,
+            @PathVariable String fieldId) {
+        professorService.deleteField(profId, fieldId);
+        return ResponseEntity.ok("Field deleted");
+    }
 
 }

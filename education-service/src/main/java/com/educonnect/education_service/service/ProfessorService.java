@@ -1,15 +1,14 @@
 package com.educonnect.education_service.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
 
 import com.educonnect.education_service.dto.ExperienceDto;
+import com.educonnect.education_service.dto.FieldDto;
 import com.educonnect.education_service.dto.PaperDto;
 import com.educonnect.education_service.dto.ProfessorDetailsDto;
 import com.educonnect.education_service.dto.ProfessorDto;
@@ -80,38 +79,47 @@ public class ProfessorService {
         professorDetailsDto.setEmail(professor.getEmail());
         professorDetailsDto.setUrl(professor.getUrl());
 
-        List<Map<String, String>> experiencesDetails = new ArrayList<>();
+        List<ExperienceDto> experiencesDetails = new ArrayList<>();
         List<Experience> experiences = experienceRepository.findByProfessorId(professor.getId());
         for (Experience experience : experiences) {
-            Map<String, String> expDto = new HashMap<>();
-            expDto.put("id", experience.getId().toString());
-            expDto.put("title", experience.getTitle());
-            expDto.put("university", getUniversityName(experience.getUniversityId()));
-            expDto.put("startYear", String.valueOf(experience.getStartYear()));
-            expDto.put("endYear", String.valueOf(experience.getEndYear()));
+            ExperienceDto expDto = new ExperienceDto();
+            expDto.setId(experience.getId().toString());
+            expDto.setUniversityId(experience.getUniversityId().toString());
+            expDto.setTitle(experience.getTitle());
+            expDto.setStartYear(String.valueOf(experience.getStartYear()));
+            expDto.setEndYear(String.valueOf(experience.getEndYear()));
+            String universityName = getUniversityName(experience.getUniversityId());
+            expDto.setUniversityName(universityName);
             experiencesDetails.add(expDto);
         }
         professorDetailsDto.setExperiences(experiencesDetails);
 
-        List<Map<String, String>> paperDtos = new ArrayList<>();
+        List<PaperDto> paperDtos = new ArrayList<>();
         List<Paper> papers = paperRepository.findByProfessorId(professor.getId());
         for (Paper paper : papers) {
-            Map<String, String> paperDto = new HashMap<>();
-            paperDto.put("id", paper.getId().toString());
-            paperDto.put("title", paper.getTitle());
-            paperDto.put("year", String.valueOf(paper.getYear()));
-            paperDto.put("journal", paper.getJournal());
+            PaperDto paperDto = new PaperDto();
+            paperDto.setId(paper.getId().toString());
+            paperDto.setTitle(paper.getTitle());
+            paperDto.setAbstractText(paper.getAbstractText());
+            paperDto.setJournal(paper.getJournal());
+            paperDto.setYear(String.valueOf(paper.getYear()));
             paperDtos.add(paperDto);
         }
         professorDetailsDto.setPapers(paperDtos);
 
         List<ProfessorField> fieldIds = professorFieldRepository.findByProfessorId(professor.getId());
-        List<String> fieldTitles = new ArrayList<>();
+        List<FieldDto> fields = new ArrayList<>();
         for (ProfessorField field : fieldIds) {
-            String fieldTitle = getFieldTitle(field.getFieldId());
-            fieldTitles.add(fieldTitle);
+            FieldDto fieldDto = new FieldDto();
+            Field f = fieldRepository.findById(field.getFieldId()).orElse(null);
+            if (f != null) {
+                fieldDto.setId(f.getId().toString());
+                fieldDto.setTitle(f.getTitle());
+                fields.add(fieldDto);
+            }
+            fields.add(fieldDto);
         }
-        professorDetailsDto.setFields(fieldTitles);
+        professorDetailsDto.setFields(fields);
 
         return professorDetailsDto;
     }
@@ -167,6 +175,7 @@ public class ProfessorService {
             Paper paper = new Paper();
             paper.setProfessorId(profId);
             paper.setTitle(paperDto.getTitle());
+            paper.setAbstractText(paperDto.getAbstractText());
             paper.setYear(Integer.parseInt(paperDto.getYear()));
             paper.setJournal(paperDto.getJournal());
             paperRepository.save(paper);
@@ -182,20 +191,31 @@ public class ProfessorService {
         }
     }
 
-    public void addField(String professorId, List<String> fieldIds) {
+    public void addField(String professorId, String fieldId) {
         UUID profId = UUID.fromString(professorId);
         Professor professor = professorRepository.findById(profId).orElse(null);
         if (professor != null) {
-            for (String fieldId : fieldIds) {
-                UUID fId = UUID.fromString(fieldId);
-                Field field = fieldRepository.findById(fId).orElse(null);
-                if (field != null) {
-                    ProfessorField professorField = new ProfessorField();
-                    professorField.setProfessorId(profId);
-                    professorField.setFieldId(fId);
-                    professorFieldRepository.save(professorField);
+            UUID fId = UUID.fromString(fieldId);
+            Field field = fieldRepository.findById(fId).orElse(null);
+            if (field != null) {
+                ProfessorField existing = professorFieldRepository.findByProfessorIdAndFieldId(profId, fId);
+                if (existing != null) {
+                    return;
                 }
+                ProfessorField professorField = new ProfessorField();
+                professorField.setProfessorId(profId);
+                professorField.setFieldId(fId);
+                professorFieldRepository.save(professorField);
             }
+        }
+    }
+
+    public void deleteField(String professorId, String fieldId) {
+        UUID profId = UUID.fromString(professorId);
+        UUID fId = UUID.fromString(fieldId);
+        ProfessorField professorField = professorFieldRepository.findByProfessorIdAndFieldId(profId, fId);
+        if (professorField != null) {
+            professorFieldRepository.delete(professorField);
         }
     }
 
@@ -206,11 +226,6 @@ public class ProfessorService {
 
     private int getPublicationsCount(UUID professorId) {
         return paperRepository.countByProfessorId(professorId);
-    }
-
-    private String getFieldTitle(UUID fieldId) {
-        Field field = fieldRepository.findById(fieldId).orElse(null);
-        return field != null ? field.getTitle() : "Unknown Field";
     }
 
 }

@@ -1,11 +1,14 @@
 package com.educonnect.education_service.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.educonnect.education_service.dto.FieldDto;
 import com.educonnect.education_service.dto.ScholarshipDto;
 import com.educonnect.education_service.dto.UniversityDto;
 import com.educonnect.education_service.model.Scholarship;
@@ -19,12 +22,15 @@ public class ScholarshipService {
     private final ScholarshipRepository scholarshipRepository;
     private final ScholarshipFieldRepository scholarshipFieldRepository;
     private final UniversityService universityService;
+    private final FieldService fieldService;
 
     public ScholarshipService(ScholarshipRepository scholarshipRepository,
-            ScholarshipFieldRepository scholarshipFieldRepository, UniversityService universityService) {
+            ScholarshipFieldRepository scholarshipFieldRepository, UniversityService universityService,
+            FieldService fieldService) {
         this.scholarshipRepository = scholarshipRepository;
         this.scholarshipFieldRepository = scholarshipFieldRepository;
         this.universityService = universityService;
+        this.fieldService = fieldService;
     }
 
     public ScholarshipDto createScholarship(ScholarshipDto scholarshipDto) {
@@ -32,16 +38,17 @@ public class ScholarshipService {
         Scholarship scholarship = new Scholarship();
         scholarship.setTitle(scholarshipDto.getTitle());
         scholarship.setDescription(scholarshipDto.getDescription());
-        scholarship.setAmount(scholarshipDto.getAmount());
+        scholarship.setAmount(Integer.parseInt(scholarshipDto.getAmount()));
+        scholarship.setDeadline(LocalDate.parse(scholarshipDto.getDeadline()));
         scholarship.setUniversityId(UUID.fromString(scholarshipDto.getUniversityId()));
         scholarship = scholarshipRepository.save(scholarship);
         scholarshipDto.setId(scholarship.getId().toString());
 
-        List<String> fieldIds = scholarshipDto.getFields();
-        for (String fieldIdString : fieldIds) {
+        List<FieldDto> fields = scholarshipDto.getFields();
+        for (FieldDto field : fields) {
             ScholarshipField scholarshipField = new ScholarshipField();
             scholarshipField.setScholarshipId(scholarship.getId());
-            scholarshipField.setFieldId(UUID.fromString(fieldIdString));
+            scholarshipField.setFieldId(UUID.fromString(field.getId()));
             scholarshipFieldRepository.save(scholarshipField);
         }
         return scholarshipDto;
@@ -56,16 +63,19 @@ public class ScholarshipService {
         dto.setId(scholarship.getId().toString());
         dto.setTitle(scholarship.getTitle());
         dto.setDescription(scholarship.getDescription());
-        dto.setAmount(scholarship.getAmount());
+        dto.setAmount(String.valueOf(scholarship.getAmount()));
         UUID universityId = scholarship.getUniversityId();
         String universityName = getUniversityName(universityId);
         dto.setUniversity(universityName);
         List<ScholarshipField> scholarshipFields = scholarshipFieldRepository
                 .findByScholarshipId(scholarship.getId());
-        List<String> fieldIds = scholarshipFields.stream()
-                .map(field -> field.getFieldId().toString())
-                .toList();
-        dto.setFields(fieldIds);
+        List<FieldDto> fields = new ArrayList<>();
+        for (ScholarshipField field : scholarshipFields) {
+            FieldDto fieldDto = fieldService.getFieldById(field.getFieldId().toString());
+            if (fieldDto != null)
+                fields.add(fieldDto);
+        }
+        dto.setFields(fields);
         return dto;
     }
 
@@ -76,16 +86,17 @@ public class ScholarshipService {
 
         scholarship.setTitle(scholarshipDto.getTitle());
         scholarship.setDescription(scholarshipDto.getDescription());
-        scholarship.setAmount(scholarshipDto.getAmount());
+        scholarship.setAmount(Integer.parseInt(scholarshipDto.getAmount()));
+        scholarship.setUniversityId(UUID.fromString(scholarshipDto.getUniversityId()));
         scholarship = scholarshipRepository.save(scholarship);
 
         List<ScholarshipField> existingFields = scholarshipFieldRepository.findByScholarshipId(scholarship.getId());
         scholarshipFieldRepository.deleteAll(existingFields);
-        List<String> fieldIds = scholarshipDto.getFields();
-        for (String fieldIdString : fieldIds) {
+        List<FieldDto> fields = scholarshipDto.getFields();
+        for (FieldDto field : fields) {
             ScholarshipField scholarshipField = new ScholarshipField();
             scholarshipField.setScholarshipId(scholarship.getId());
-            scholarshipField.setFieldId(UUID.fromString(fieldIdString));
+            scholarshipField.setFieldId(UUID.fromString(field.getId()));
             scholarshipFieldRepository.save(scholarshipField);
         }
         scholarshipDto.setId(scholarship.getId().toString());
@@ -99,16 +110,19 @@ public class ScholarshipService {
             dto.setId(scholarship.getId().toString());
             dto.setTitle(scholarship.getTitle());
             dto.setDescription(scholarship.getDescription());
-            dto.setAmount(scholarship.getAmount());
+            dto.setAmount(String.valueOf(scholarship.getAmount()));
             UUID uId = scholarship.getUniversityId();
             String universityName = getUniversityName(uId);
             dto.setUniversity(universityName);
             List<ScholarshipField> scholarshipFields = scholarshipFieldRepository
                     .findByScholarshipId(scholarship.getId());
-            List<String> fieldIds = scholarshipFields.stream()
-                    .map(field -> field.getFieldId().toString())
-                    .toList();
-            dto.setFields(fieldIds);
+            List<FieldDto> fields = new ArrayList<>();
+            for (ScholarshipField field : scholarshipFields) {
+                FieldDto fieldDto = fieldService.getFieldById(field.getFieldId().toString());
+                if (fieldDto != null)
+                    fields.add(fieldDto);
+            }
+            dto.setFields(fields);
             return dto;
         }).toList();
     }
@@ -120,7 +134,8 @@ public class ScholarshipService {
             dto.setId(scholarship.getId().toString());
             dto.setTitle(scholarship.getTitle());
             dto.setDescription(scholarship.getDescription());
-            dto.setAmount(scholarship.getAmount());
+            dto.setAmount(String.valueOf(scholarship.getAmount()));
+            dto.setUniversityId(scholarship.getUniversityId().toString());
 
             UUID universityId = scholarship.getUniversityId();
             String universityName = getUniversityName(universityId);
@@ -128,10 +143,13 @@ public class ScholarshipService {
 
             List<ScholarshipField> scholarshipFields = scholarshipFieldRepository
                     .findByScholarshipId(scholarship.getId());
-            List<String> fieldIds = scholarshipFields.stream()
-                    .map(field -> field.getFieldId().toString())
-                    .toList();
-            dto.setFields(fieldIds);
+            List<FieldDto> fields = new ArrayList<>();
+            for (ScholarshipField field : scholarshipFields) {
+                FieldDto fieldDto = fieldService.getFieldById(field.getFieldId().toString());
+                if (fieldDto != null)
+                    fields.add(fieldDto);
+            }
+            dto.setFields(fields);
             return dto;
         }).toList();
     }
@@ -146,16 +164,20 @@ public class ScholarshipService {
             dto.setId(scholarship.getId().toString());
             dto.setTitle(scholarship.getTitle());
             dto.setDescription(scholarship.getDescription());
-            dto.setAmount(scholarship.getAmount());
+            dto.setAmount(String.valueOf(scholarship.getAmount()));
+            dto.setUniversityId(scholarship.getUniversityId().toString());
             UUID universityId = scholarship.getUniversityId();
             String universityName = getUniversityName(universityId);
             dto.setUniversity(universityName);
-            List<ScholarshipField> fields = scholarshipFieldRepository
+            List<ScholarshipField> sFields = scholarshipFieldRepository
                     .findByScholarshipId(scholarship.getId());
-            List<String> fieldIds = fields.stream()
-                    .map(field -> field.getFieldId().toString())
-                    .toList();
-            dto.setFields(fieldIds);
+            List<FieldDto> fields = new ArrayList<>();
+            for (ScholarshipField field : sFields) {
+                FieldDto fieldDto = fieldService.getFieldById(field.getFieldId().toString());
+                if (fieldDto != null)
+                    fields.add(fieldDto);
+            }
+            dto.setFields(fields);
             return dto;
         }).toList();
     }

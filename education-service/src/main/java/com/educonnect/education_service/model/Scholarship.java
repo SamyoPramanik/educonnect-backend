@@ -3,6 +3,7 @@ package com.educonnect.education_service.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,14 +21,13 @@ public class Scholarship {
     private String title;
 
     @NotBlank(message = "Description is required")
+    @Column(length = 2000)
     private String description;
 
-    @NotBlank(message = "Deadline is required")
     private LocalDate deadline;
 
-    private String amount;
+    private int amount;
 
-    @NotBlank(message = "University ID is required")
     private UUID universityId;
 
     public UUID getId() {
@@ -62,11 +62,11 @@ public class Scholarship {
         this.deadline = deadline;
     }
 
-    public String getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 

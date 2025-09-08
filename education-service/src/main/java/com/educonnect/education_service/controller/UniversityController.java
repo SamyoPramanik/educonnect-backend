@@ -58,7 +58,7 @@ public class UniversityController {
         return ResponseEntity.ok(createdUniversity);
     }
 
-    @PostMapping("/{id}")
+    @GetMapping("/{id}")
     @Tag(name = "Get university by ID")
     @Operation(summary = "Get university by ID")
     public ResponseEntity<UniversityDto> getUniversityById(@RequestHeader("Authorization") String token,

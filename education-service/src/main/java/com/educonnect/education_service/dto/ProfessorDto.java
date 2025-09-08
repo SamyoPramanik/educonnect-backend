@@ -20,6 +20,9 @@ public class ProfessorDto {
     @NotBlank(message = "URL is required")
     private String url;
 
+    public ProfessorDto() {
+    }
+
     public ProfessorDto(String id, @NotBlank(message = "Name is required") String name,
             @NotBlank(message = "Bio is required") String bio,
             @NotBlank(message = "Country is required") String country,

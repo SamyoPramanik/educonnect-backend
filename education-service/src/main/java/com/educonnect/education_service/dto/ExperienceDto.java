@@ -5,9 +5,13 @@ public class ExperienceDto {
 
     private String title;
     private String universityId;
+    private String universityName;
     private String startYear;
     private String endYear;
     private String professorId;
+
+    public ExperienceDto() {
+    }
 
     public ExperienceDto(String id, String title, String universityId, String startYear, String endYear,
             String professorId) {
@@ -65,5 +69,13 @@ public class ExperienceDto {
 
     public void setProfessorId(String professorId) {
         this.professorId = professorId;
+    }
+
+    public String getUniversityName() {
+        return universityName;
+    }
+
+    public void setUniversityName(String universityName) {
+        this.universityName = universityName;
     }
 }

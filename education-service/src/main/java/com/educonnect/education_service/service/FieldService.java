@@ -2,6 +2,7 @@ package com.educonnect.education_service.service;
 
 import com.educonnect.education_service.model.Field;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -32,6 +33,14 @@ public class FieldService {
         }
         FieldDto fieldDto = new FieldDto(field.getId().toString(), field.getTitle());
         return fieldDto;
+    }
+
+    public List<FieldDto> getAllFields() {
+        List<Field> fields = fieldRepository.findAll();
+        List<FieldDto> fieldDtos = fields.stream()
+                .map(field -> new FieldDto(field.getId().toString(), field.getTitle()))
+                .toList();
+        return fieldDtos;
     }
 
     public FieldDto updateField(String id, FieldDto fieldDto) {

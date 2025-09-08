@@ -23,6 +23,7 @@ public class ScholarshipDto {
     String universityId;
 
     String university;
+    List<FieldDto> fields;
 
     public String getUniversity() {
         return university;
@@ -31,8 +32,6 @@ public class ScholarshipDto {
     public void setUniversity(String university) {
         this.university = university;
     }
-
-    List<String> fields;
 
     public String getId() {
         return id;
@@ -82,11 +81,11 @@ public class ScholarshipDto {
         this.universityId = universityId;
     }
 
-    public List<String> getFields() {
+    public List<FieldDto> getFields() {
         return fields;
     }
 
-    public void setFields(List<String> fields) {
+    public void setFields(List<FieldDto> fields) {
         this.fields = fields;
     }
 }

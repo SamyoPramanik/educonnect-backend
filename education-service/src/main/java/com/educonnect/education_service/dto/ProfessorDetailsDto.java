@@ -1,7 +1,6 @@
 package com.educonnect.education_service.dto;
 
 import java.util.List;
-import java.util.Map;
 
 public class ProfessorDetailsDto {
     private String id;
@@ -10,15 +9,15 @@ public class ProfessorDetailsDto {
     private String country;
     private String email;
     private String url;
-    private List<String> fields;
-    private List<Map<String, String>> experiences;
-    private List<Map<String, String>> papers;
+    private List<FieldDto> fields;
+    private List<ExperienceDto> experiences;
+    private List<PaperDto> papers;
 
-    public List<String> getFields() {
+    public List<FieldDto> getFields() {
         return fields;
     }
 
-    public void setFields(List<String> fields) {
+    public void setFields(List<FieldDto> fields) {
         this.fields = fields;
     }
 
@@ -70,19 +69,19 @@ public class ProfessorDetailsDto {
         this.url = url;
     }
 
-    public List<Map<String, String>> getExperiences() {
+    public List<ExperienceDto> getExperiences() {
         return experiences;
     }
 
-    public void setExperiences(List<Map<String, String>> experiences) {
+    public void setExperiences(List<ExperienceDto> experiences) {
         this.experiences = experiences;
     }
 
-    public List<Map<String, String>> getPapers() {
+    public List<PaperDto> getPapers() {
         return papers;
     }
 
-    public void setPapers(List<Map<String, String>> papers) {
+    public void setPapers(List<PaperDto> papers) {
         this.papers = papers;
     }
 
