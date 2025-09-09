@@ -1,5 +1,6 @@
 package com.educonnect.housing_service.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -31,6 +32,27 @@ public class AmenityService {
                     dto.setId(amenity.getId().toString());
                     dto.setName(amenity.getName());
                     return dto;
+                })
+                .orElse(null);
+    }
+
+    public List<AmenityDto> getAllAmenities() {
+        List<Amenity> amenities = amenityRepository.findAll();
+        return amenities.stream().map(amenity -> {
+            AmenityDto dto = new AmenityDto();
+            dto.setId(amenity.getId().toString());
+            dto.setName(amenity.getName());
+            return dto;
+        }).toList();
+    }
+
+    public AmenityDto updateAmenity(String id, AmenityDto amenityDto) {
+        return amenityRepository.findById(UUID.fromString(id))
+                .map(amenity -> {
+                    amenity.setName(amenityDto.getName());
+                    Amenity updatedAmenity = amenityRepository.save(amenity);
+                    amenityDto.setId(updatedAmenity.getId().toString());
+                    return amenityDto;
                 })
                 .orElse(null);
     }

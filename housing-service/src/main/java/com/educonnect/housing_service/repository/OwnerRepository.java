@@ -9,5 +9,5 @@ import com.educonnect.housing_service.model.Owner;
 
 @Repository
 public interface OwnerRepository extends JpaRepository<Owner, UUID> {
-
+    Owner findByUserId(UUID userId);
 }

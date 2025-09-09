@@ -2,6 +2,7 @@ package com.educonnect.housing_service.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -10,10 +11,12 @@ import com.educonnect.housing_service.dto.AmenityDto;
 import com.educonnect.housing_service.dto.HouseDto;
 import com.educonnect.housing_service.dto.HouseEditDto;
 import com.educonnect.housing_service.dto.OwnerDto;
+import com.educonnect.housing_service.dto.UniversityDto;
 import com.educonnect.housing_service.model.House;
 import com.educonnect.housing_service.model.HouseAmenity;
 import com.educonnect.housing_service.repository.HouseAmenityRepository;
 import com.educonnect.housing_service.repository.HouseRepository;
+import com.educonnect.housing_service.util.EducationUtil;
 
 @Service
 public class HouseService {
@@ -21,18 +24,20 @@ public class HouseService {
     private final AmenityService amenityService;
     private final HouseAmenityRepository houseAmenityRepository;
     private final OwnerService ownerService;
+    private final EducationUtil educationUtil;
 
     public HouseService(HouseRepository houseRepository, AmenityService amenityService,
-            HouseAmenityRepository houseAmenityRepository, OwnerService ownerService) {
+            HouseAmenityRepository houseAmenityRepository, OwnerService ownerService, EducationUtil educationUtil) {
         this.houseRepository = houseRepository;
         this.amenityService = amenityService;
         this.houseAmenityRepository = houseAmenityRepository;
         this.ownerService = ownerService;
+        this.educationUtil = educationUtil;
     }
 
     public HouseEditDto createHouse(HouseEditDto houseEditDto) {
         // Convert DTO to entity
-        var houseModel = new House();
+        House houseModel = new House();
         houseModel.setTitle(houseEditDto.getTitle());
         houseModel.setDescription(houseEditDto.getDescription());
         houseModel.setType(houseEditDto.getType());
@@ -43,17 +48,23 @@ public class HouseService {
         houseModel.setState(houseEditDto.getState());
         houseModel.setCity(houseEditDto.getCity());
         houseModel.setAddress(houseEditDto.getAddress());
+        OwnerDto ownerDto = ownerService.getOwnerById(houseEditDto.getOwnerId());
+        if (ownerDto == null) {
+            throw new RuntimeException("Owner not found with id: " + houseEditDto.getOwnerId());
+        }
         houseModel.setOwnerId(UUID.fromString(houseEditDto.getOwnerId()));
         houseModel.setUniversityId(UUID.fromString(houseEditDto.getUniversityId()));
         houseModel.setDistanceToUniversity(Double.parseDouble(houseEditDto.getDistanceToUniversity()));
 
-        for (AmenityDto amenity : houseEditDto.getAmenities()) {
-            AmenityDto amenityDto = amenityService.getAmenityById(UUID.fromString(amenity.getId()).toString());
-            if (amenityDto != null) {
-                HouseAmenity houseAmenity = new HouseAmenity();
-                houseAmenity.setAmenityId(UUID.fromString(amenityDto.getId()));
-                houseAmenity.setHouseId(UUID.fromString(houseEditDto.getId()));
-                houseAmenityRepository.save(houseAmenity);
+        if (houseEditDto.getAmenities() != null) {
+            for (AmenityDto amenity : houseEditDto.getAmenities()) {
+                AmenityDto amenityDto = amenityService.getAmenityById(amenity.getId());
+                if (amenityDto != null) {
+                    HouseAmenity houseAmenity = new HouseAmenity();
+                    houseAmenity.setAmenityId(UUID.fromString(amenityDto.getId()));
+                    houseAmenity.setHouseId(UUID.fromString(houseEditDto.getId()));
+                    houseAmenityRepository.save(houseAmenity);
+                }
             }
         }
 
@@ -66,7 +77,7 @@ public class HouseService {
         return houseEditDto;
     }
 
-    public HouseDto getHouseById(String id) {
+    public HouseDto getHouseById(String id, String token) {
         return houseRepository.findById(UUID.fromString(id))
                 .map(house -> {
                     HouseDto dto = new HouseDto();
@@ -84,9 +95,19 @@ public class HouseService {
                     dto.setDistanceToUniversity(house.getDistanceToUniversity());
 
                     OwnerDto ownerDto = ownerService.getOwnerById(house.getOwnerId().toString());
+                    dto.setOwnerId(ownerDto.getId());
                     dto.setOwner(ownerDto.getName());
                     dto.setContactEmail(ownerDto.getEmail());
                     dto.setContactPhone(ownerDto.getPhone());
+                    dto.setUniversityId(house.getUniversityId().toString());
+
+                    UniversityDto universityDto = educationUtil
+                            .getUniversityById(house.getUniversityId(), token);
+                    if (universityDto != null) {
+                        dto.setUniversity(universityDto.getName());
+                    } else {
+                        dto.setUniversity("Unknown");
+                    }
                     // Fetch and set amenities
                     List<AmenityDto> amenities = new ArrayList<>();
                     List<HouseAmenity> houseAmenities = houseAmenityRepository.findByHouseId(UUID.fromString(id));
@@ -103,45 +124,57 @@ public class HouseService {
     }
 
     public HouseEditDto updateHouse(String id, HouseEditDto houseEditDto) {
-        return houseRepository.findById(UUID.fromString(id))
-                .map(house -> {
-                    house.setTitle(houseEditDto.getTitle());
-                    house.setDescription(houseEditDto.getDescription());
-                    house.setType(houseEditDto.getType());
-                    house.setPricePerMonth(Integer.parseInt(houseEditDto.getPricePerMonth()));
-                    house.setNumberOfBedrooms(Integer.parseInt(houseEditDto.getNumberOfBedrooms()));
-                    house.setNumberOfBathrooms(Integer.parseInt(houseEditDto.getNumberOfBathrooms()));
-                    house.setCountry(houseEditDto.getCountry());
-                    house.setState(houseEditDto.getState());
-                    house.setCity(houseEditDto.getCity());
-                    house.setAddress(houseEditDto.getAddress());
-                    house.setOwnerId(UUID.fromString(houseEditDto.getOwnerId()));
-                    house.setUniversityId(UUID.fromString(houseEditDto.getUniversityId()));
-                    house.setDistanceToUniversity(Double.parseDouble(houseEditDto.getDistanceToUniversity()));
+        Optional<House> houseOpt = houseRepository.findById(UUID.fromString(id));
+        if (houseOpt.isEmpty()) {
+            throw new RuntimeException("House not found with id: " + id);
+        } else if (houseEditDto.getOwnerId() == null) {
+            throw new RuntimeException("Owner ID is required for update.");
+        }
 
-                    // Update amenities
-                    var existingAmenities = houseAmenityRepository.findByHouseId(house.getId());
-                    houseAmenityRepository.deleteAll(existingAmenities);
+        House house = houseOpt.get();
 
-                    for (AmenityDto amenityDto : houseEditDto.getAmenities()) {
-                        AmenityDto amenityDto2 = amenityService
-                                .getAmenityById(UUID.fromString(amenityDto.getId()).toString());
-                        if (amenityDto2 != null) {
-                            HouseAmenity houseAmenity = new HouseAmenity();
-                            houseAmenity.setAmenityId(UUID.fromString(amenityDto2.getId()));
-                            houseAmenity.setHouseId(house.getId());
-                            houseAmenityRepository.save(houseAmenity);
-                        }
-                    }
+        house.setTitle(houseEditDto.getTitle());
+        house.setDescription(houseEditDto.getDescription());
+        house.setType(houseEditDto.getType());
+        house.setPricePerMonth(Integer.parseInt(houseEditDto.getPricePerMonth()));
+        house.setNumberOfBedrooms(Integer.parseInt(houseEditDto.getNumberOfBedrooms()));
+        house.setNumberOfBathrooms(Integer.parseInt(houseEditDto.getNumberOfBathrooms()));
+        house.setCountry(houseEditDto.getCountry());
+        house.setState(houseEditDto.getState());
+        house.setCity(houseEditDto.getCity());
+        house.setAddress(houseEditDto.getAddress());
+        OwnerDto ownerDto = ownerService.getOwnerById(houseEditDto.getOwnerId());
+        if (ownerDto == null) {
+            throw new RuntimeException("Owner not found with id: " + houseEditDto.getOwnerId());
+        }
+        house.setOwnerId(UUID.fromString(ownerDto.getId()));
+        house.setUniversityId(UUID.fromString(houseEditDto.getUniversityId()));
+        house.setDistanceToUniversity(Double.parseDouble(houseEditDto.getDistanceToUniversity()));
 
-                    var updatedHouse = houseRepository.save(house);
-                    houseEditDto.setId(updatedHouse.getId().toString());
-                    return houseEditDto;
-                })
-                .orElse(null);
+        // Update amenities
+        var existingAmenities = houseAmenityRepository.findByHouseId(house.getId());
+        houseAmenityRepository.deleteAll(existingAmenities);
+
+        if (houseEditDto.getAmenities() != null) {
+            for (AmenityDto amenityDto : houseEditDto.getAmenities()) {
+                AmenityDto amenityDto2 = amenityService
+                        .getAmenityById(amenityDto.getId());
+                if (amenityDto2 != null) {
+                    HouseAmenity houseAmenity = new HouseAmenity();
+                    houseAmenity.setAmenityId(UUID.fromString(amenityDto2.getId()));
+                    houseAmenity.setHouseId(house.getId());
+                    houseAmenityRepository.save(houseAmenity);
+                }
+            }
+        }
+
+        House updatedHouse = houseRepository.save(house);
+        houseEditDto.setId(updatedHouse.getId().toString());
+        return houseEditDto;
+
     }
 
-    public List<HouseDto> getAllHouses() {
+    public List<HouseDto> getAllHouses(String token) {
         return houseRepository.findAll().stream()
                 .map(house -> {
                     HouseDto dto = new HouseDto();
@@ -157,11 +190,21 @@ public class HouseService {
                     dto.setCity(house.getCity());
                     dto.setAddress(house.getAddress());
                     dto.setDistanceToUniversity(house.getDistanceToUniversity());
+                    dto.setOwnerId(house.getOwnerId().toString());
 
                     OwnerDto ownerDto = ownerService.getOwnerById(house.getOwnerId().toString());
                     dto.setOwner(ownerDto.getName());
                     dto.setContactEmail(ownerDto.getEmail());
                     dto.setContactPhone(ownerDto.getPhone());
+                    dto.setUniversityId(house.getUniversityId().toString());
+
+                    UniversityDto universityDto = educationUtil
+                            .getUniversityById(house.getUniversityId(), token);
+                    if (universityDto != null) {
+                        dto.setUniversity(universityDto.getName());
+                    } else {
+                        dto.setUniversity("Unknown");
+                    }
 
                     // Fetch and set amenities
                     List<AmenityDto> amenities = new ArrayList<>();

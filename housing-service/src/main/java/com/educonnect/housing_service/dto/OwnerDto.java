@@ -6,6 +6,7 @@ public class OwnerDto {
     private String email;
     private String phone;
     private String address;
+    private String userId;
 
     public String getId() {
         return id;
@@ -45,5 +46,13 @@ public class OwnerDto {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

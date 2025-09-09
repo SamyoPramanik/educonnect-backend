@@ -15,8 +15,10 @@ public class HouseDto {
     private String city;
     private String address;
     private String owner;
+    private String ownerId;
     private String contactEmail;
     private String contactPhone;
+    private String universityId;
     private String university;
     private List<AmenityDto> amenities;
 
@@ -156,5 +158,21 @@ public class HouseDto {
 
     public void setAmenities(List<AmenityDto> amenities) {
         this.amenities = amenities;
+    }
+
+    public String getUniversityId() {
+        return universityId;
+    }
+
+    public void setUniversityId(String universityId) {
+        this.universityId = universityId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }

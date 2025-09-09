@@ -17,6 +17,7 @@ public class Owner {
     private String email;
     private String phone;
     private String address;
+    private UUID userId;
 
     public UUID getId() {
         return id;
@@ -56,6 +57,14 @@ public class Owner {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
 }
